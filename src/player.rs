@@ -12,31 +12,36 @@ pub struct Player {
     pub speed: f32,
 }
 
-pub enum Collider {
-    Solid,
-    // Scorable,
-}
-
 fn player_movement(
     time: Res<Time>,
     keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<(&Player, &mut Translation)>,
+    mut query: Query<(&Player, &mut Transform)>,
 ) {
-    for (player, mut translation) in &mut query.iter() {
-        if keyboard_input.pressed(KeyCode::Left) {
-            *translation.0.x_mut() += time.delta_seconds * -1.0 * player.speed;
-        }
+    for (player, mut transform) in &mut query.iter_mut() {
 
-        if keyboard_input.pressed(KeyCode::Right) {
-            *translation.0.x_mut() += time.delta_seconds * 1.0 * player.speed;
-        }
+        let arrow_keys: Vec<KeyCode> = [
+            KeyCode::Left, 
+            KeyCode::Right, 
+            KeyCode::Up, 
+            KeyCode::Down
+        ].into();
 
-        if keyboard_input.pressed(KeyCode::Up) {
-            *translation.0.y_mut() += time.delta_seconds * 1.0 * player.speed;
-        }
+        for key_code in arrow_keys {
+            if !keyboard_input.pressed(key_code) { continue };
+            
+            transform.translation.x += time.delta_seconds() * player.speed * 
+                match key_code {
+                    KeyCode::Left => -1.0,
+                    KeyCode::Right => 1.0,
+                    _ => { 0f32 }
+                };
 
-        if keyboard_input.pressed(KeyCode::Down) {
-            *translation.0.y_mut() += time.delta_seconds * -1.0 * player.speed;
+            transform.translation.y += time.delta_seconds() * player.speed * 
+                match key_code {
+                    KeyCode::Up => 1.0,
+                    KeyCode::Down => -1.0,
+                    _ => { 0f32 }
+                };
         }
     }
 }
